@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import {upsertStreamUser} from "../lib/stream.js"
 
 export async function signup(req, res) {
   const email = req.body.email?.trim();
@@ -41,6 +42,17 @@ export async function signup(req, res) {
       profilePic: randomAvatar,
     });
 
+    try {
+        await upsertStreamUser({
+            id: newUser._id.toString(),
+            name: newUser.fullName,
+            image: newUser.profilePic || ""
+        });
+        console.log(`Stream user created for ${newUser.fullName}`);
+    } catch (error) {
+        console.log("Error creating stream user:", error);
+    }
+
     const token = jwt.sign(
       { userId: newUser._id },
       process.env.JWT_SECRET_KEY,
@@ -68,7 +80,7 @@ export async function login(req, res) {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      res.status(400).json({ message: "All fileds are required" });
+      res.status(400).json({ message: "All fields are required" });
     }
 
     const user = await User.findOne({ email });
@@ -80,7 +92,7 @@ export async function login(req, res) {
       return res.status(401).json({ message: "Invalid email or password" });
 
     const token = jwt.sign(
-      { userId: newUser._id },
+      { userId: user._id },
       process.env.JWT_SECRET_KEY,
       {
         expiresIn: "7d",
@@ -102,5 +114,6 @@ export async function login(req, res) {
 }
 
 export function logout(req, res) {
-  res.send("logout router");
+  res.clearCookie("jwt");
+  res.status(200).json({success:true, message: "Logout succesful"});
 }
