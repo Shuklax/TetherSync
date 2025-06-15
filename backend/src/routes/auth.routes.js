@@ -13,6 +13,9 @@ router.post("/logout", logout);
 
 router.post("/onboarding", protectRoute, onboard);
 
+//forget password functionality
+//verification email functionality
+
 router.get("/me", protectRoute, function (req, res) {
   res.status(200).json({ success: true, user: req.user });
 });
