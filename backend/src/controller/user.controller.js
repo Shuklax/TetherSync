@@ -1,4 +1,6 @@
-import User from "../models/User";
+import User from "../models/User.js";
+import FriendRequest from "../models/FriendRequest.js";
+import FriendRequest from "../models/FriendRequest.js";
 
 export async function getRecommendedUsers(req, res) {
   try {
@@ -15,18 +17,108 @@ export async function getRecommendedUsers(req, res) {
     res.status(200).json(recommendedUsers);
   } catch (error) {
     console.log("Error in getRecomended controller", error.message);
-    res.status(500).json({message: "Internal Server Error"});
+    res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
 export async function getMyFriends(req, res) {
-    try {
-        const user = await User.findById(req.user.id).select("friends")
-        .populate("friends", "fullName profilePic nativeLanguage learningLanguage")
+  try {
+    const user = await User.findById(req.user.id)
+      .select("friends")
+      .populate(
+        "friends",
+        "fullName profilePic nativeLanguage learningLanguage"
+      );
 
-        res.status(200).json(user.friends);
-    } catch (error) {
-        console.log("Error in getMyFriends controller", error.message);
-        res.status(500).json({message: "Internal Server Error"});
+    res.status(200).json(user.friends);
+  } catch (error) {
+    console.log("Error in getMyFriends controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function sendFriendRequest(req, res) {
+  try {
+    const myId = req.user.id;
+    const { id: recipientId } = req.params;
+
+    //prevent sending req to yourself
+    if (myId === recipientId) {
+      return res
+        .status(400)
+        .json({ message: "You can't send friend request to yourself." });
     }
+
+    const recipient = await User.findById(recipientId);
+    if (!recipient) {
+      return res.status(404).json({ message: "Recipient not found" });
+    }
+
+    //check if user is already friends
+    if (recipient.friends.includes(myId)) {
+      return res
+        .status(400)
+        .json({ message: "You are already friends with this person" });
+    }
+
+    //check if a req already exists
+    const existingRequests = await FriendRequest.findOne({
+      $or: [
+        { sender: myId, recipient: recipientId },
+        { sender: recipientId, recipient: myId },
+      ],
+    });
+
+    if (existingRequests) {
+      return res.status(400).json({
+        message: "A friend request already exists between you and this user",
+      });
+    }
+
+    const FriendRequest = await FriendRequest.create({
+      sender: myId,
+      recipient: recipientId,
+    });
+  } catch (error) {
+    console.log("Error in sendFriendRequest Controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function acceptFriendRequest(req, res) {
+  try {
+    const { id: requestId } = req.params;
+
+    const friendRequest = await FriendRequest.findById(requestId);
+
+    if (!friendRequest) {
+      return res.status(404).json({ message: "Friend Request not found" });
+    }
+
+    //verify the current user is the recipient
+    if (friendRequest.recipient.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to accept this request" });
+    }
+
+    friendRequest.status = "accepted";
+    await friendRequest.save();
+
+    //if the request is accepted then two users are friends
+    // that means both user's id's will be in each others friends array
+    //$addToSet : adds elements to an array onlt if they do not already exist
+    await User.findByIdAndUpdate(friendRequest.sender, {
+      $addToSet: { friends: friendRequest.recipient },
+    });
+
+    await User.findByIdAndUpdate(friendRequest.recipient, {
+      $addToSet: { friends: friendRequest.sender },
+    });
+
+    res.status(200).json({ message: "Friend Requests accepted" });
+  } catch (error) {
+    console.log("Error in acceptFriendRequests controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 }
