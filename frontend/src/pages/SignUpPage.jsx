@@ -2,6 +2,10 @@ import { useState } from "react";
 import { AudioWaveform } from "lucide-react";
 import { Link } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+<<<<<<< HEAD
+
+=======
+>>>>>>> 39d426cc818fdd7c1fb5b26f158967e351b0a0df
 import { signup } from "../lib/api";
 
 const SignUpPage = () => {
@@ -46,7 +50,7 @@ const SignUpPage = () => {
           {/* Error */}
           {error && (
             <div className="alert alert-error mb-4">
-              <span>{error.response.data.message}</span>
+              <span>{error.message}</span>
             </div>
           )}
 
@@ -178,7 +182,7 @@ const SignUpPage = () => {
           <div className="max-w p-8">
             <div className="relative aspect-square mx-auto mx-w-sm">
               <img
-                src="../../public/vd.png"
+                src="/vd.png"
                 alt="illustration"
                 className="w-full h-full"
               />
