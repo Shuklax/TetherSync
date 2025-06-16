@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AudioWaveform } from "lucide-react";
 import { Link } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { axiosInstance } from "../lib/axios";
+
 import { signup } from "../lib/api";
 
 const SignUpPage = () => {
@@ -168,7 +168,7 @@ const SignUpPage = () => {
           <div className="max-w p-8">
             <div className="relative aspect-square mx-auto mx-w-sm">
               <img
-                src="../../public/vd.png"
+                src="/vd.png"
                 alt="illustration"
                 className="w-full h-full"
               />
