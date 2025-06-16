@@ -2,7 +2,6 @@ import { useState } from "react";
 import { AudioWaveform } from "lucide-react";
 import { Link } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { axiosInstance } from "../lib/axios";
 import { signup } from "../lib/api";
 
 const SignUpPage = () => {
@@ -14,7 +13,11 @@ const SignUpPage = () => {
 
   const queryClient = useQueryClient();
 
-  const { mutate: signupMutation, isPending, error } = useMutation({
+  const {
+    mutate: signupMutation,
+    isPending,
+    error,
+  } = useMutation({
     mutationFn: signup,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] }),
   });
@@ -143,7 +146,14 @@ const SignUpPage = () => {
                   </div>
 
                   <button className="btn btn-primary w-full" type="submit">
-                    {isPending ? "Signing up....." : "Create Account"}
+                    {isPending ? (
+                      <>
+                        <span className="loading loading-spinner loading-xs"></span>
+                        Loading...
+                      </>
+                    ) : (
+                      "Create Account"
+                    )}
                   </button>
 
                   <div className="text-center mt-4">
