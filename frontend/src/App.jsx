@@ -39,7 +39,17 @@ const App = () => {
         />
         <Route
           path="/login"
-          element={!isAuthenticated ? <LoginPage /> : <Navigate to="/" />}
+          element={
+            isAuthenticated ? (
+              isOnboarded ? (
+                <Navigate to="/" />
+              ) : (
+                <Navigate to="/onboarding" />
+              )
+            ) : (
+              <LoginPage />
+            )
+          }
         />
         <Route
           path="/notifications"
