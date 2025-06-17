@@ -2,11 +2,8 @@ import { useState } from "react";
 import { AudioWaveform } from "lucide-react";
 import { Link } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-<<<<<<< HEAD
-
-=======
->>>>>>> 39d426cc818fdd7c1fb5b26f158967e351b0a0df
 import { signup } from "../lib/api";
+import useSignUp from "../hooks/useSignUp";
 
 const SignUpPage = () => {
   const [signupData, setSignupData] = useState({
@@ -15,16 +12,18 @@ const SignUpPage = () => {
     password: "",
   });
 
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
-  const {
-    mutate: signupMutation,
-    isPending,
-    error,
-  } = useMutation({
-    mutationFn: signup,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] }),
-  });
+  // const {
+  //   mutate: signupMutation,
+  //   isPending,
+  //   error,
+  // } = useMutation({
+  //   mutationFn: signup,
+  //   onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+  // });
+
+  const {error, isPending, signupMutation} = useSignUp()
 
   const handleSignup = (e) => {
     e.preventDefault();
